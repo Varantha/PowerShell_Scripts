@@ -9,7 +9,7 @@
             a process window.
 
         .PARAMETER Id
-            Name of the process to determine the window characteristics
+            Id of the process to determine the window characteristics
 
         .PARAMETER X
             Set the position of the window in pixels from the top.
@@ -32,6 +32,8 @@
             Version History
                 1.0//Boe Prox - 11/24/2015
                     - Initial build
+                1.1//Varantha - 2022/11/06
+                    - Updated to use Id
 
         .OUTPUT
             System.Automation.WindowInfo
