@@ -8,7 +8,7 @@
             Sets the window size (height,width) and coordinates (x,y) of
             a process window.
 
-        .PARAMETER ProcessName
+        .PARAMETER Id
             Name of the process to determine the window characteristics
 
         .PARAMETER X
@@ -39,10 +39,6 @@
         .EXAMPLE
             Get-Process powershell | Set-Window -X 2040 -Y 142 -Passthru
 
-            ProcessName Size     TopLeft  BottomRight
-            ----------- ----     -------  -----------
-            powershell  1262,642 2040,142 3302,784   
-
             Description
             -----------
             Set the coordinates on the window for the process PowerShell.exe
@@ -51,8 +47,8 @@
     [OutputType('System.Automation.WindowInfo')]
     [cmdletbinding()]
     Param (
-        [parameter(ValueFromPipelineByPropertyName=$True)]
-        $ProcessName,
+        [parameter(ValueFromPipelineByPropertyName = $True)]
+        $Id,
         [int]$X,
         [int]$Y,
         [int]$Width,
@@ -60,10 +56,11 @@
         [switch]$Passthru
     )
     Begin {
-        Try{
+        Try {
             [void][Window]
-        } Catch {
-        Add-Type @"
+        }
+        Catch {
+            Add-Type @"
               using System;
               using System.Runtime.InteropServices;
               public class Window {
@@ -86,8 +83,8 @@
     }
     Process {
         $Rectangle = New-Object RECT
-        $Handle = (Get-Process -Name $ProcessName).MainWindowHandle
-        $Return = [Window]::GetWindowRect($Handle,[ref]$Rectangle)
+        $Handle = (Get-Process -Id $Id).MainWindowHandle
+        $Return = [Window]::GetWindowRect($Handle, [ref]$Rectangle)
         If (-NOT $PSBoundParameters.ContainsKey('Width')) {            
             $Width = $Rectangle.Right - $Rectangle.Left            
         }
@@ -95,11 +92,11 @@
             $Height = $Rectangle.Bottom - $Rectangle.Top
         }
         If ($Return) {
-            $Return = [Window]::MoveWindow($Handle, $x, $y, $Width, $Height,$True)
+            $Return = [Window]::MoveWindow($Handle, $x, $y, $Width, $Height, $True)
         }
         If ($PSBoundParameters.ContainsKey('Passthru')) {
             $Rectangle = New-Object RECT
-            $Return = [Window]::GetWindowRect($Handle,[ref]$Rectangle)
+            $Return = [Window]::GetWindowRect($Handle, [ref]$Rectangle)
             If ($Return) {
                 $Height = $Rectangle.Bottom - $Rectangle.Top
                 $Width = $Rectangle.Right - $Rectangle.Left
@@ -110,12 +107,12 @@
                     Write-Warning "Window is minimized! Coordinates will not be accurate."
                 }
                 $Object = [pscustomobject]@{
-                    ProcessName = $ProcessName
-                    Size = $Size
-                    TopLeft = $TopLeft
+                    Id          = $Id
+                    Size        = $Size
+                    TopLeft     = $TopLeft
                     BottomRight = $BottomRight
                 }
-                $Object.PSTypeNames.insert(0,'System.Automation.WindowInfo')
+                $Object.PSTypeNames.insert(0, 'System.Automation.WindowInfo')
                 $Object            
             }
         }
